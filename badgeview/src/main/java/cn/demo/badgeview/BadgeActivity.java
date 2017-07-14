@@ -3,14 +3,14 @@ package cn.demo.badgeview;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.support.v4.view.ViewCompat;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import javax.crypto.spec.RC2ParameterSpec;
-
 /**
- * Created by Administrator on 2017/7/10 0010.
+ * Created by Denny on 2017/7/10 0010.
  */
 
 public class BadgeActivity implements BadgeInterface {
@@ -20,19 +20,26 @@ public class BadgeActivity implements BadgeInterface {
     private BadgeLayout mLayout;
     private BadgeView mBadgeView;
     private Context mContext;
+    private View.OnLayoutChangeListener mOnLayoutChange;
 
     public BadgeActivity(View anchor){
         mAnchor = anchor;
         mContext = mAnchor.getContext();
         mLayout = new BadgeLayout();
         if(!resolveTopLayout()){
-            throw new IllegalStateException("anchorview must add to contentView");
+            throw new IllegalStateException("anchor view must add to contentView");
         }
         createBadge();
     }
 
     private void createBadge() {
-        mBadgeView = new BadgeView(mContext);
+        mBadgeView = new BadgeView(mContext){
+            @Override
+            public void discard() {
+                hide();
+            }
+        };
+        mBadgeView.setOnTouchListener(new DragDispatcher(mBadgeView));
     }
 
     public void setBadgeView(BadgeView badgeView){
@@ -46,9 +53,16 @@ public class BadgeActivity implements BadgeInterface {
         Rect rect = new Rect();
         mBadgeView.getBadgeRect(rect);
         mLayout.setBadgeRect(rect);
-        mAnchor.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+        attachAnchor();
+    }
+
+    private void attachAnchor() {
+        mAnchor.addOnLayoutChangeListener(mOnLayoutChange = new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                /*if(left-oldLeft==0 && top-oldTop==0 && right-oldRight==0 && bottom-oldBottom==0){
+                    return;
+                }*/
                 Rect anchorRect = new Rect();
                 int[] location = new int[]{0, 0};
                 int[] anchorLoc = new int[]{0, 0};
@@ -68,6 +82,21 @@ public class BadgeActivity implements BadgeInterface {
                 updateBadgeView(mLayout.resolveBadgePosition());
             }
         });
+        mAnchor.requestLayout();
+    }
+
+    @Override
+    public void hide() {
+        if(mFrameLayout!=null&&mBadgeView!=null){
+            mFrameLayout.removeView(mBadgeView);
+            detachAnchor();
+        }
+    }
+
+    private void detachAnchor() {
+        if(mAnchor!=null&&mOnLayoutChange!=null){
+            mAnchor.removeOnLayoutChangeListener(mOnLayoutChange);
+        }
     }
 
     private void updateBadgeView(Point point) {
@@ -111,8 +140,8 @@ public class BadgeActivity implements BadgeInterface {
     }
 
     @Override
-    public void setBadgeDrawbale(BadgeDrawable drawbale) {
-        mLayout.setBadgeRect(drawbale.getBounds());
-        mBadgeView.setBadgeDrawable(drawbale);
+    public void setBadgeDrawable(BadgeDrawable drawable) {
+        mLayout.setBadgeRect(drawable.getBounds());
+        mBadgeView.setBadgeDrawable(drawable);
     }
 }

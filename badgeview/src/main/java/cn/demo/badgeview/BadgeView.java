@@ -13,7 +13,7 @@ import android.view.View;
  * Created by Administrator on 2017/7/7 0007.
  */
 
-public class BadgeView extends View {
+public class BadgeView extends View implements Moveable{
 
     private final static String TAG = BadgeView.class.getSimpleName();
 
@@ -29,16 +29,20 @@ public class BadgeView extends View {
 
     public BadgeView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
         mBadge = new BadgeDrawable();
         mBadge.setBackground(Color.RED);
         mBadge.setTextSize((int) getResources().getDimension(R.dimen.badge_text_size));
         mBadge.setPadding((int) getResources().getDimension(R.dimen.badge_padding_size));
         mBadge.setTextColor(Color.WHITE);
+
     }
 
     public void setBadgeText(String text){
         mBadge.setText(text);
     }
+
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -85,4 +89,21 @@ public class BadgeView extends View {
     public void getBadgeRect(Rect rect) {
         rect.set(mBadge.getBounds());
     }
+
+
+    @Override
+    public void moveX(float x) {
+        setX(x);
+    }
+
+    @Override
+    public void moveY(float y) {
+        setY(y);
+    }
+
+    @Override
+    public void discard() {
+
+    }
+
 }

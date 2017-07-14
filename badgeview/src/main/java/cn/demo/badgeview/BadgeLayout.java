@@ -4,7 +4,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 
 /**
- * Created by Administrator on 2017/7/10 0010.
+ * Created by Denny on 2017/7/10 0010.
+ * 负责布局位置,输出的为x,y值,即左上角位置
  */
 
 public class BadgeLayout {

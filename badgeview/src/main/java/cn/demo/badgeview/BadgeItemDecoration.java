@@ -5,7 +5,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 public class BadgeItemDecoration extends RecyclerView.ItemDecoration
         implements BadgeInterface{
 
+    private static final  String TAG = BadgeItemDecoration.class.getSimpleName();
 
     private final int mAnchorId;
     private final int mAnchorPos;
@@ -23,7 +26,9 @@ public class BadgeItemDecoration extends RecyclerView.ItemDecoration
     private SparseArray<View> mAnchorCache;
     private BadgeLayout mLayout;
     private RecyclerView mRecycler;
+    private Rect mBadgeRect = new Rect();
     private boolean mHasAttched = false;
+    private boolean mTouchBadge = false;
 
     BadgeItemDecoration(int anchorId, int anchorPos) {
         mAnchorId = anchorId;
@@ -44,6 +49,7 @@ public class BadgeItemDecoration extends RecyclerView.ItemDecoration
         Rect childRect = new Rect();
         for (int i = 0, size = parent.getChildCount(); i< size ; ++i){
             if(needBadge(parent, state, i)){
+                Log.i(TAG, "onDrawOver: ");
                 View anchorView = resolveAnchorView(parent, i);
                 View itemView = parent.getChildAt(i);
                 Rect rect = resolveAnchorViewPositionInItemView(anchorView, itemView);
@@ -51,9 +57,16 @@ public class BadgeItemDecoration extends RecyclerView.ItemDecoration
                 int y = (int) ViewCompat.getTranslationY(itemView);
                 mLayout.setOffset(new Point(0, y + childRect.top));
                 mLayout.setTargetRect(rect);
-                drawBadge(c, mLayout.resolveBadgePosition(), i);
+                Point point = mLayout.resolveBadgePosition();
+                drawBadge(c, point, i);
+                setBadgeRect(point);
             }
         }
+    }
+
+    private void setBadgeRect(Point point) {
+        mBadgeRect.set(mBadgeDrawable.getBounds());
+        mBadgeRect.offset(point.x, point.y);
     }
 
     private Rect resolveAnchorViewPositionInItemView(View anchorView, View itemView) {
@@ -142,9 +155,9 @@ public class BadgeItemDecoration extends RecyclerView.ItemDecoration
     }
 
     @Override
-    public void setBadgeDrawbale(BadgeDrawable drawbale) {
-        mBadgeDrawable = drawbale;
-        mLayout.setBadgeRect(drawbale.getBounds());
+    public void setBadgeDrawable(BadgeDrawable drawable) {
+        mBadgeDrawable = drawable;
+        mLayout.setBadgeRect(drawable.getBounds());
     }
 
     @Override
@@ -152,6 +165,17 @@ public class BadgeItemDecoration extends RecyclerView.ItemDecoration
         if(mHasAttched)
             return;
         mRecycler.addItemDecoration(this);
+        mRecycler.addOnItemTouchListener(new RecycleDragDispatcher(mBadgeDrawable, mBadgeRect));
         mHasAttched = true;
+    }
+
+
+
+    @Override
+    public void hide() {
+        if(mHasAttched){
+            mRecycler.removeItemDecoration(this);
+            mHasAttched = false;
+        }
     }
 }

@@ -13,7 +13,7 @@ import android.util.Log;
  * Created by Administrator on 2017/7/7 0007.
  */
 
-public class BadgeDrawable extends GradientDrawable {
+public class BadgeDrawable extends GradientDrawable implements Moveable{
 
     private final static  String TAG = BadgeDrawable.class.getSimpleName();
 
@@ -72,7 +72,6 @@ public class BadgeDrawable extends GradientDrawable {
 
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
-        Log.i(TAG, String.format("setBounds: left %d, top %d, right %d, bottom %d", left, top, right, bottom));
         int width = right - left, height = bottom - top;
         if(width < height){
             width = height;
@@ -109,4 +108,30 @@ public class BadgeDrawable extends GradientDrawable {
         resolveSize();
     }
 
+    @Override
+    public void moveX(float x) {
+        Rect b  = getBounds();
+        setBounds(Math.round(x), b.top, Math.round(b.height() + x), b.bottom);
+    }
+
+    @Override
+    public void moveY(float y) {
+        Rect b = getBounds();
+        setBounds(b.left, Math.round(y) , b.right, Math.round(b.height() + y));
+    }
+
+    @Override
+    public float getX() {
+        return getBounds().left;
+    }
+
+    @Override
+    public float getY() {
+        return getBounds().top;
+    }
+
+    @Override
+    public void discard() {
+
+    }
 }

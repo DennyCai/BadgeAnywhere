@@ -12,8 +12,10 @@ public interface BadgeInterface {
 
     void setOffset(int x, int y);
 
-    void setBadgeDrawbale(BadgeDrawable drawbale);
+    void setBadgeDrawable(BadgeDrawable drawable);
 
     void show();
+
+    void hide();
 
 }

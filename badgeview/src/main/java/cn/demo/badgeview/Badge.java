@@ -30,7 +30,7 @@ public class Badge {
      * 设置字体颜色
      * @param color
      */
-    public Badge setTextColor(int color) {
+    public Badge setTextColor(@ColorInt int color) {
         mBadge.setTextColor(color);
         return this;
     }
@@ -107,8 +107,13 @@ public class Badge {
     }
 
     public Badge show() {
-        mInterface.setBadgeDrawbale(mBadge);
+        mInterface.setBadgeDrawable(mBadge);
         mInterface.show();
+        return this;
+    }
+
+    public Badge dismiss(){
+        mInterface.hide();
         return this;
     }
 
